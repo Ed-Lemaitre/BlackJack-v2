@@ -1,9 +1,9 @@
+# myfunctions.py
+
 import myclasses as myc
 import random
-import sys, os
 
 game_instance = myc.game()
-print("game instantiated")
 
 
 def play_game():
@@ -20,8 +20,6 @@ def play_game():
             break
 
     deal()
-    # game_instance.player_cards = ["5♠", "5♦"]
-    # game_instance.dealer_cards = ["5♣", "6♠"]
 
     while True:
         screen_print("game_screen")
@@ -74,10 +72,9 @@ def play_game():
 
 
 def screen_print(to_print):
-    os.system("cls")
     if to_print == "instructions":
         print("--- Welcome to Black Jack---")
-    if to_print == "game_screen":
+    elif to_print == "game_screen":
         print(f"Visible dealers card is: {game_instance.dealer_cards[0]}")
         print("Your hand is: ", end="")
         for a in game_instance.player_cards:
@@ -87,15 +84,15 @@ def screen_print(to_print):
         print(
             "Please choose and option: (Sp)lit / (Do)uble / (Hi)t / (St)ay / (Q)uit: "
         )
-    if to_print == "is_natural":
+    elif to_print == "is_natural":
         print("Congratulations! You have won!")
-    if to_print == "no_split":
+    elif to_print == "no_split":
         print("Split is not possible. Try other option")
-    if to_print == "no_double":
+    elif to_print == "no_double":
         print("Double is not possible. Try other option")
-    if to_print == "split_instructions":
+    elif to_print == "split_instructions":
         print("Now you have two games.")
-    if to_print == "split_game_screen":
+    elif to_print == "split_game_screen":
         print(f"Visible dealers card is: {game_instance.dealer_cards[0]}")
         print("Your first hand is ", end="")
         for a in game_instance.player_split_A:
@@ -105,16 +102,16 @@ def screen_print(to_print):
         for a in game_instance.player_split_B:
             print(f"{a} ", end="")
         print("")
-    if to_print == "make_bet":
+    elif to_print == "make_bet":
         print(f"You have {game_instance.current_money} available")
         print("Make your bet: ", end="")
-    if to_print == "show_game":
+    elif to_print == "show_game":
         print(f"Visible dealers card is: {game_instance.dealer_cards[0]}")
         print("Your hand is: ", end="")
         for a in game_instance.player_cards:
             print(f"{a} ", end="")
         print("")
-    if to_print == "resume":
+    elif to_print == "resume":
         print("-------------------------------")
         print("You have finished this round")
         print(f"You have ${game_instance.current_money}")
@@ -164,9 +161,6 @@ def deal_one(object_property):
 
 
 def random_card():
-    # print("----- inside random_card() ------")
-    # print(f"deck es {game_instance.deck}")
-    # print("---------------------------------")
     card_position = random.randrange(0, len(game_instance.deck) - 1)
     return game_instance.deck.pop(card_position)
 
@@ -180,12 +174,9 @@ def split():
         game_instance.split_B_bet_amount = game_instance.bet_amount
         game_instance.current_money -= game_instance.bet_amount
         game_instance.bet_amount = 0
-
         game_instance.player_split_A.append(game_instance.player_cards[0])
         game_instance.player_split_B.append(game_instance.player_cards[1])
-
         return True
-
     else:
         screen_print("no_split")
     return False
@@ -198,11 +189,10 @@ def double():
         game_instance.is_normal = False
         game_instance.current_money -= game_instance.bet_amount
         game_instance.bet_amount += game_instance.bet_amount
-
-        # play_double()
-
+        return True
     else:
         screen_print("no_double")
+        return False
 
 
 def play_double():
@@ -220,31 +210,8 @@ def is_double_possible():
 
 
 def is_sum_double(object_property):
-    l = []
-    sum_max = 0
-    sum_min = 0
-    for a in object_property:
-        l.append(a[:-1])
-    for card_values in l:
-        if card_values == "A":
-            sum_max += 11
-            sum_min += 1
-        elif card_values == "K":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "Q":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "J":
-            sum_max += 10
-            sum_min += 10
-        else:
-            sum_max += int(card_values)
-            sum_min += int(card_values)
-    if sum_max in range(9, 12) or sum_min in range(9, 12):
-        return True
-    else:
-        return False
+    sum_to_check = sum_min_best(object_property)
+    return sum_to_check[0] in range(9, 12) or sum_to_check[1] in range(9, 12)
 
 
 def play_normal():
@@ -270,17 +237,6 @@ def play_normal():
             break
 
 
-def hit():  # this function is for the player
-    deal_one(game_instance.player_cards)
-    if is_busted(game_instance.player_cards):
-        print("You loose !!")
-        game_instance.bet_amount = 0
-
-
-def stay():
-    pass
-
-
 def is_natural(mano_verificar):
     nat = ["10", "J", "Q", "K"]
     if sum([cadena.count("A") for cadena in mano_verificar]) == 1:
@@ -299,27 +255,8 @@ def is_split_possible():
 
 
 def is_busted(object_property):
-    l = []
-    sum = 0
-    for a in object_property:
-        l.append(a[:-1])
-    for card_values in l:
-        if card_values == "A":
-            sum += 1
-        elif card_values == "K":
-            sum += 10
-        elif card_values == "Q":
-            sum += 10
-        elif card_values == "J":
-            sum += 10
-        elif card_values == "10":
-            sum += 10
-        else:
-            sum += int(card_values)
-    if sum > 21:
-        return True
-    else:
-        return False
+    sum_to_check = sum_min_best(object_property)
+    return sum_to_check[0] > 21
 
 
 def play_split():
@@ -366,45 +303,14 @@ def play_split():
 
 def dealer_play():
     while True:
-        sum_dealer = is_sum_dealer(game_instance.dealer_cards)
-        if sum_dealer[0] < 17 or sum_dealer[1] < 17:
+        sum_dealer = min(sum_min_best(game_instance.dealer_cards))
+        if sum_dealer < 17:
             deal_one(game_instance.dealer_cards)
             if is_busted(game_instance.dealer_cards):
                 game_instance.is_busted_dealer = True
                 break
         else:
             break
-
-
-def hit_dealer():
-    deal_one(game_instance.dealer_cards)
-    if is_busted(game_instance.dealer_cards):
-        return False
-
-
-def is_sum_dealer(object_property):
-    l = []
-    sum_max = 0
-    sum_min = 0
-    for a in object_property:
-        l.append(a[:-1])
-    for card_values in l:
-        if card_values == "A":
-            sum_max += 11
-            sum_min += 1
-        elif card_values == "K":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "Q":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "J":
-            sum_max += 10
-            sum_min += 10
-        else:
-            sum_max += int(card_values)
-            sum_min += int(card_values)
-    return (sum_min, sum_max)
 
 
 def pay():
@@ -430,8 +336,8 @@ def pay_normal():
         game_instance.current_money += game_instance.bet_amount * 2
         game_instance.bet_amount = 0
     else:
-        sum_dealer = sum_pay(game_instance.dealer_cards)
-        sum_player = sum_pay(game_instance.player_cards)
+        sum_dealer = max(sum_min_best(game_instance.dealer_cards))
+        sum_player = max(sum_min_best(game_instance.player_cards))
         if sum_dealer > sum_player:
             game_instance.bet_amount = 0
         elif sum_dealer < sum_player:
@@ -454,8 +360,8 @@ def pay_split():
         game_instance.current_money += game_instance.split_A_bet_amount * 2
         game_instance.split_A_bet_amount = 0
     else:
-        sum_dealer = sum_pay(game_instance.dealer_cards)
-        sum_player = sum_pay(game_instance.player_split_A)
+        sum_dealer = max(sum_min_best(game_instance.dealer_cards))
+        sum_player = max(sum_min_best(game_instance.player_split_A))
         if sum_dealer > sum_player:
             game_instance.split_A_bet_amount = 0
         elif sum_dealer < sum_player:
@@ -472,8 +378,8 @@ def pay_split():
         game_instance.current_money += game_instance.split_B_bet_amount * 2
         game_instance.split_B_bet_amount = 0
     else:
-        sum_dealer = sum_pay(game_instance.dealer_cards)
-        sum_player = sum_pay(game_instance.player_split_B)
+        sum_dealer = max(sum_min_best(game_instance.dealer_cards))
+        sum_player = max(sum_min_best(game_instance.player_split_B))
         if sum_dealer > sum_player:
             game_instance.split_B_bet_amount = 0
         elif sum_dealer < sum_player:
@@ -484,29 +390,15 @@ def pay_split():
             game_instance.split_B_bet_amount = 0
 
 
-def sum_pay(object_property):
-    l = []
-    sum_max = 0
-    sum_min = 0
-    for a in object_property:
-        l.append(a[:-1])
-    for card_values in l:
-        if card_values == "A":
-            sum_max += 11
-            sum_min += 1
-        elif card_values == "K":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "Q":
-            sum_max += 10
-            sum_min += 10
-        elif card_values == "J":
-            sum_max += 10
-            sum_min += 10
-        else:
-            sum_max += int(card_values)
-            sum_min += int(card_values)
-    if sum_max < 22:
-        return sum_max
-    else:
-        return sum_min
+def sum_min_best(object_property):
+    lista = [x[:-1] for x in object_property]
+
+    count_A = lista.count("A")
+    count_JQK = sum([lista.count(fig) for fig in ["J", "Q", "K"]])
+    sum_digits = sum([int(x) for x in lista if x.isdigit()])
+
+    sum_min = sum_digits + count_JQK * 10 + count_A * 1
+    sum_max = sum_min + (10 if count_A > 0 else 0)
+    sum_best = sum_min if sum_max > 21 else sum_max
+
+    return (sum_min, sum_best)
